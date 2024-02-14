@@ -1,3 +1,5 @@
+with hex ;
+
 package body q is
 
    crc_table : constant array(1..256) of Unsigned_32 := (
@@ -38,7 +40,16 @@ package body q is
    function Version return String is
    begin
       return "0.1" ;
+
    end Version ;
+
+   procedure Set( pkt : out QpacketType ; pktb : QpktElementsType ) is
+      pktoute : QpktElementsType ;
+      for pktoute'Address use pkt'Address ;
+   begin
+      pktoute := pktb ;
+   end Set ;
+
 
    function CRC( pkt : QpacketType ) return Unsigned_32 is
       result : Unsigned_32 := 16#ffffffff# ;
@@ -50,9 +61,8 @@ package body q is
       loop
          step1 := Shift_Right(result , 8 ) ;
          step2 := result and 16#0000_00ff# ;
-         step3 := crc_table (Integer(Unsigned_32(pkte(Stream_Element_Offset(i))))) ;
-         result := step1 or
-           step2 or
+         step3 := crc_table (1+Integer(Unsigned_32(pkte(Stream_Element_Offset(i))) xor step2 )) ;
+         result := step1 xor
            step3  ;
       end loop ;
       return result ;
@@ -75,7 +85,7 @@ package body q is
 
    function Image( pkt : QpacketType ) return String is
    begin
-      return "?" ;
+      return hex.Image( pkt'Address , pkt'Size/8 );
    end Image ;
 
    function Value( pktv : String ) return QpacketType is

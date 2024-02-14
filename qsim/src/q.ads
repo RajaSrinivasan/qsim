@@ -70,6 +70,7 @@ package q is
    function Version return String ;
    CRC_Start : constant := 3 ;
    CRC_End : constant := 27 ;
+   procedure Set( pkt : out QpacketType ; pktb : QpktElementsType );
    function CRC( pkt : QpacketType ) return Unsigned_32 ;
    procedure CRC( pkt : in out QpacketType ) ;
    function Check( pkt : QpacketType ) return boolean ;
