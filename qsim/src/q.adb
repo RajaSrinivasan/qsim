@@ -1,9 +1,6 @@
 package body q is
-   function Version return String is
-   begin
-      return "0.1" ;
-   end Version ;
-   crc_table : array(1..256) of Unsigned_32 := (
+
+   crc_table : constant array(1..256) of Unsigned_32 := (
                                                   16#00000000# ,
  16#77073096# ,  16#ee0e612c# ,  16#990951ba# ,  16#076dc419# ,  16#706af48f# ,  16#e963a535# ,  16#9e6495a3# ,  16#0edb8832# ,
  16#79dcb8a4# ,  16#e0d5e91e# ,  16#97d2d988# ,  16#09b64c2b# ,  16#7eb17cbd# ,  16#e7b82d07# ,  16#90bf1d91# ,  16#1db71064# ,
@@ -37,6 +34,57 @@ package body q is
  16#d9d65adc# ,  16#40df0b66# ,  16#37d83bf0# ,  16#a9bcae53# ,  16#debb9ec5# ,  16#47b2cf7f# ,  16#30b5ffe9# ,  16#bdbdf21c# ,
  16#cabac28a# ,  16#53b39330# ,  16#24b4a3a6# ,  16#bad03605# ,  16#cdd70693# ,  16#54de5729# ,  16#23d967bf# ,  16#b3667a2e# ,
  16#c4614ab8# ,  16#5d681b02# ,  16#2a6f2b94# ,  16#b40bbe37# ,  16#c30c8ea1# ,  16#5a05df1b# ,  16#2d02ef8d# ) ;
+
+   function Version return String is
+   begin
+      return "0.1" ;
+   end Version ;
+
+   function CRC( pkt : QpacketType ) return Unsigned_32 is
+      result : Unsigned_32 := 16#ffffffff# ;
+      step1,step2,step3 : Unsigned_32 ;
+      pkte : QpktElementsType ;
+      for pkte'Address use pkt'Address ;
+   begin
+      for i in CRC_Start..CRC_End
+      loop
+         step1 := Shift_Right(result , 8 ) ;
+         step2 := result and 16#0000_00ff# ;
+         step3 := crc_table (Integer(Unsigned_32(pkte(Stream_Element_Offset(i))))) ;
+         result := step1 or
+           step2 or
+           step3  ;
+      end loop ;
+      return result ;
+   end CRC ;
+
+   procedure CRC( pkt : in out QpacketType ) is
+   begin
+      pkt.crc := CRC(pkt) ;
+   end CRC ;
+
+   function Check( pkt : QpacketType ) return boolean is
+      computed : Unsigned_32 := CRC(pkt) ;
+   begin
+      if computed = pkt.crc
+      then
+         return true ;
+      end if ;
+      return False ;
+   end Check ;
+
+   function Image( pkt : QpacketType ) return String is
+   begin
+      return "?" ;
+   end Image ;
+
+   function Value( pktv : String ) return QpacketType is
+      result : QpacketType ;
+      resulte : QpktElementsType := (others => 16#88#) ;
+      for resulte'Address use result'Address;
+   begin
+      return result ;
+   end Value ;
 
 
 end q ;

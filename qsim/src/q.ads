@@ -68,4 +68,13 @@ package q is
    CRC_basis : constant := 16#EDB88320# ;
 
    function Version return String ;
+   CRC_Start : constant := 3 ;
+   CRC_End : constant := 27 ;
+   function CRC( pkt : QpacketType ) return Unsigned_32 ;
+   procedure CRC( pkt : in out QpacketType ) ;
+   function Check( pkt : QpacketType ) return boolean ;
+   function Image( pkt : QpacketType ) return String ;
+   function Value( pktv : String ) return QpacketType ;
+
+
 end q ;
