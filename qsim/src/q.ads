@@ -76,6 +76,9 @@ package q is
    function Check( pkt : QpacketType ) return boolean ;
    function Image( pkt : QpacketType ) return String ;
    function Value( pktv : String ) return QpacketType ;
-
+   procedure Show( pkt : QpacketType ) ;
+   procedure Show( pkte : QpktElementsType ) ;
+   procedure Show( mp : MeasurementPacket );
+   procedure Show( measId : MeasurementId );
 
 end q ;

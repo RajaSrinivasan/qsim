@@ -1,3 +1,7 @@
+with Ada.Text_Io; use Ada.Text_Io;
+with Ada.Integer_Text_Io; use Ada.Integer_Text_Io;
+with Ada.Float_Text_Io; use Ada.Float_Text_Io;
+
 with hex ;
 
 package body q is
@@ -95,6 +99,41 @@ package body q is
    begin
       return result ;
    end Value ;
+
+   procedure Show( pkt : QpacketType ) is
+   begin
+      Show( pkt.mp );
+      Put("CRC "); Put(hex.Image(pkt.crc)); New_Line;
+   end Show ;
+
+   procedure Show( pkte : QpktElementsType ) is
+   begin
+      null ;
+   end Show ;
+
+   procedure Show( mp : MeasurementPacket ) is
+   begin
+      Show( mp.measId ) ;
+      Put("Value ");
+
+      begin
+         Put( mp.measValue ) ;
+      exception
+         when others => Put(" invalid ");
+      end ;
+      New_Line;
+
+      Put("Precision "); Put( Integer(mp.precision) ); New_Line;
+      Put("Units "); Put( Integer(mp.units) ); New_Line;
+      Put("Alarm Code "); Put( Integer(mp.alarmCode) , base => 16 ); New_Line;
+      Put("Alarm Limits: " );  Put("Lower "); Put(mp.lowerAlarmLimit); Put(" Upper "); Put(mp.upperAlarmLimit) ;New_Line;
+   end Show ;
+
+   procedure Show( measId : MeasurementId ) is
+   begin
+      null ;
+   end Show ;
+
 
 
 end q ;
