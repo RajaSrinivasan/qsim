@@ -1,3 +1,9 @@
+with Ada.Text_Io; use Ada.Text_Io;
+with Ada.Integer_Text_Io; use Ada.Integer_Text_Io;
+with Ada.Float_Text_Io; use Ada.Float_Text_Io;
+
+with hex ;
+
 package body q is
 
    crc_table : constant array(1..256) of Unsigned_32 := (
@@ -38,7 +44,16 @@ package body q is
    function Version return String is
    begin
       return "0.1" ;
+
    end Version ;
+
+   procedure Set( pkt : out QpacketType ; pktb : QpktElementsType ) is
+      pktoute : QpktElementsType ;
+      for pktoute'Address use pkt'Address ;
+   begin
+      pktoute := pktb ;
+   end Set ;
+
 
    function CRC( pkt : QpacketType ) return Unsigned_32 is
       result : Unsigned_32 := 16#ffffffff# ;
@@ -50,9 +65,8 @@ package body q is
       loop
          step1 := Shift_Right(result , 8 ) ;
          step2 := result and 16#0000_00ff# ;
-         step3 := crc_table (Integer(Unsigned_32(pkte(Stream_Element_Offset(i))))) ;
-         result := step1 or
-           step2 or
+         step3 := crc_table (1+Integer(Unsigned_32(pkte(Stream_Element_Offset(i))) xor step2 )) ;
+         result := step1 xor
            step3  ;
       end loop ;
       return result ;
@@ -75,7 +89,7 @@ package body q is
 
    function Image( pkt : QpacketType ) return String is
    begin
-      return "?" ;
+      return hex.Image( pkt'Address , pkt'Size/8 );
    end Image ;
 
    function Value( pktv : String ) return QpacketType is
@@ -85,6 +99,41 @@ package body q is
    begin
       return result ;
    end Value ;
+
+   procedure Show( pkt : QpacketType ) is
+   begin
+      Show( pkt.mp );
+      Put("CRC "); Put(hex.Image(pkt.crc)); New_Line;
+   end Show ;
+
+   procedure Show( pkte : QpktElementsType ) is
+   begin
+      null ;
+   end Show ;
+
+   procedure Show( mp : MeasurementPacket ) is
+   begin
+      Show( mp.measId ) ;
+      Put("Value ");
+
+      begin
+         Put( mp.measValue ) ;
+      exception
+         when others => Put(" invalid ");
+      end ;
+      New_Line;
+
+      Put("Precision "); Put( Integer(mp.precision) ); New_Line;
+      Put("Units "); Put( Integer(mp.units) ); New_Line;
+      Put("Alarm Code "); Put( Integer(mp.alarmCode) , base => 16 ); New_Line;
+      Put("Alarm Limits: " );  Put("Lower "); Put(mp.lowerAlarmLimit); Put(" Upper "); Put(mp.upperAlarmLimit) ;New_Line;
+   end Show ;
+
+   procedure Show( measId : MeasurementId ) is
+   begin
+      null ;
+   end Show ;
+
 
 
 end q ;
