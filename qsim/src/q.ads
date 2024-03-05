@@ -2,8 +2,22 @@ with Ada.Streams ; use Ada.Streams ;
 with Interfaces ; use Interfaces ;
 
 package q is
+
+   -- Baud Rate 115200
+   -- Data Bits 8
+   -- Stop Bit 1
+   -- Parity None
+   -- Flow Control None
+
    PACKET_SIZE : constant := 33 ;
    MEASUREMENT_PKT_SIZE : constant := 23 ;
+
+   BEL : constant := 16#07# ;
+   SOH : constant := 16#01# ;
+   STX : constant := 16#02# ;
+   ETX : constant := 16#03# ;
+   EOT : constant := 16#04# ;
+
    type Start_Packet is
       record
          bel : Unsigned_8 := 16#07# ;
@@ -12,10 +26,25 @@ package q is
    for Start_Packet'Size use 2*8 ;
 
    type DeviceType is mod 2**8 ;
+   QWS15 : constant DeviceType := 1 ;
+   QWS12 : constant DeviceType := 2 ;
+   QWS12EliteG2 : constant DeviceType := 7 ;
+
    type DeviceNumber is mod 2**5 ;
    type Socket is mod 2**6 ;
+
    type SensorPart is mod 2**4 ;
+
+   PreSATSO2 : constant SensorPart := 2;
+   PostSATSO2 : constant SensorPart := 1;
+
    type MeasurementType is mod 2**9 ;
+
+   QMNone : constant MeasurementType := 100 ;
+   QMSO2 : constant MeasurementType := 101 ;
+   QMHb : constant MeasurementType := 102 ;
+   QMHct : constant MeasurementType := 103 ;
+   QMCIW : constant MeasurementType := 125 ;
 
    type MeasurementId is
       record
@@ -51,6 +80,8 @@ package q is
      with Convention => C ;
    pragma pack(MeasurementPacket);
 
+   QNTM_PKT_TYPE_MEASUAREMENT : constant := 0 ;
+
    type QpacketType is
       record
          sop : Start_Packet ;
@@ -75,10 +106,9 @@ package q is
    procedure CRC( pkt : in out QpacketType ) ;
    function Check( pkt : QpacketType ) return boolean ;
    function Image( pkt : QpacketType ) return String ;
-   function Value( pktv : String ) return QpacketType ;
+      function Value( pktv : String ) return QpacketType ;
    procedure Show( pkt : QpacketType ) ;
    procedure Show( pkte : QpktElementsType ) ;
    procedure Show( mp : MeasurementPacket );
    procedure Show( measId : MeasurementId );
-
 end q ;
